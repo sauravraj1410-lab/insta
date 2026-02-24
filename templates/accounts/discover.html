@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Discover People</title>
+    <style>
+        body { font-family: Arial; background:#fafafa; }
+        .user {
+            background:white;
+            padding:10px;
+            margin:10px;
+            border:1px solid #ddd;
+            display:flex;
+            justify-content:space-between;
+        }
+        a { text-decoration:none; }
+    </style>
+</head>
+<body>
+
+<h3>Discover People</h3>
+<a href="/">⬅ Back</a>
+
+{% for user in users %}
+<div class="user">
+    <strong>{{ user.username }}</strong>
+
+    {% if user.id in following_ids %}
+        <a href="/accounts/follow/{{ user.id }}/">Unfollow</a>
+    {% else %}
+        <a href="/accounts/follow/{{ user.id }}/">Follow</a>
+    {% endif %}
+</div>
+{% empty %}
+<p>No users found</p>
+{% endfor %}
+
+</body>
+</html>

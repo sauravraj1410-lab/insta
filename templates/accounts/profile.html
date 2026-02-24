@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ user_profile.username }} • Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fafafa;
+            margin: 0;
+        }
+        .header {
+            background: white;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 15px;
+        }
+        .profile-top {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #ccc;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .stats div {
+            font-size: 14px;
+        }
+        .upload-box {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .upload-box input {
+            margin-top: 6px;
+        }
+        .post {
+            background: white;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+        img.post-img, video {
+            width: 100%;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <a href="/">⬅ Home</a>
+    <strong>{{ user_profile.username }}</strong>
+    <a href="/accounts/logout/" style="color:red;">Logout</a>
+</div>
+
+<div class="container">
+
+    <!-- PROFILE HEADER -->
+    <div class="profile-top">
+        <img id="avatarPreview"
+             src="{{ profile.avatar|default:'https://via.placeholder.com/90' }}"
+             class="avatar">
+
+        <div>
+            <strong>{{ user_profile.username }}</strong>
+            <p style="margin:4px 0;">{{ profile.bio|default:"just enjoying my life" }}</p>
+        </div>
+    </div>
+
+    <!-- STATS -->
+<div class="stats">
+    <div>
+        <strong>{{ post_count }}</strong><br>Posts
+    </div>
+
+    <div>
+        <a href="/accounts/followers/{{ user_profile.id }}/">
+            <strong>{{ followers_count }}</strong><br>Followers
+        </a>
+    </div>
+
+    <div>
+        <a href="/accounts/following/{{ user_profile.id }}/">
+            <strong>{{ following_count }}</strong><br>Following
+        </a>
+    </div>
+</div>
+
+
+    <!-- PROFILE PHOTO UPLOAD (PHOTO ONLY) -->
+    <div class="upload-box">
+        <input type="file" id="avatarFile" accept="image/*">
+        <br>
+        <button onclick="uploadAvatar()">Update Profile Photo</button>
+    </div>
+
+    <hr>
+
+    <!-- POSTS -->
+    {% for post in posts %}
+        <div class="post">
+            {% if ".mp4" in post.media_url %}
+                <video src="{{ post.media_url }}" controls></video>
+            {% else %}
+                <img src="{{ post.media_url }}" class="post-img">
+            {% endif %}
+            <p>{{ post.caption }}</p>
+        </div>
+    {% empty %}
+        <p>No posts yet.</p>
+    {% endfor %}
+
+</div>
+
+<script>
+async function uploadAvatar() {
+    const file = document.getElementById("avatarFile").files[0];
+
+    if (!file) {
+        alert("Please select a photo");
+        return;
+    }
+
+    // ❌ Block video upload explicitly
+    if (!file.type.startsWith("image/")) {
+        alert("Only photos are allowed ❌");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "mini_insta_upload");
+
+    // Upload to Cloudinary
+    const cloudRes = await fetch(
+        "https://api.cloudinary.com/v1_1/dlxwcejgs/image/upload",
+        { method: "POST", body: formData }
+    );
+
+    const cloudData = await cloudRes.json();
+
+    if (!cloudData.secure_url) {
+        alert("Upload failed");
+        return;
+    }
+
+    // Send URL to Django
+    const djangoData = new FormData();
+    djangoData.append("avatar", cloudData.secure_url);
+
+    await fetch("/accounts/avatar/", {
+        method: "POST",
+        body: djangoData,
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        }
+    });
+
+    // Update preview instantly
+    document.getElementById("avatarPreview").src = cloudData.secure_url;
+}
+</script>
+
+</body>
+</html>

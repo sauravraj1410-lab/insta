@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h3>Edit Profile</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="avatar" placeholder="Avatar URL" value="{{ profile.avatar }}">
+    <textarea name="bio">{{ profile.bio }}</textarea>
+    <button>Save</button>
+</form>
+
+</body>
+</html>

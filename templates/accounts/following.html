@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family:Arial;background:#fafafa;">
+
+<h3>{{ user_profile.username }} • Following</h3>
+<a href="/accounts/profile/">⬅ Back</a>
+<hr>
+
+{% for f in following %}
+    <div style="padding:10px;border-bottom:1px solid #ddd;">
+        <a href="/accounts/user/{{ f.following.id }}/">
+            {{ f.following.username }}
+        </a>
+    </div>
+{% empty %}
+    <p>Not following anyone</p>
+{% endfor %}
+
+</body>
+</html>

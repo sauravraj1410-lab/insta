@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family:Arial;background:#fafafa;">
+
+<h3>{{ user_profile.username }} • Followers</h3>
+<a href="/accounts/profile/">⬅ Back</a>
+<hr>
+
+{% for f in followers %}
+    <div style="padding:10px;border-bottom:1px solid #ddd;">
+        <a href="/accounts/user/{{ f.follower.id }}/">
+            {{ f.follower.username }}
+        </a>
+    </div>
+{% empty %}
+    <p>No followers yet</p>
+{% endfor %}
+
+</body>
+</html>

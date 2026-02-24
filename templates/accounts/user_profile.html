@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>{{ profile_user.username }}</h2>
+
+{% if profile.avatar %}
+<img src="{{ profile.avatar }}" width="100">
+{% endif %}
+
+<p>{{ profile.bio }}</p>
+
+<p>
+<strong>{{ followers_count }}</strong> Followers |
+<strong>{{ following_count }}</strong> Following
+</p>
+
+{% if request.user != profile_user %}
+<form method="POST" action="/accounts/follow/{{ profile_user.id }}/">
+    {% csrf_token %}
+    <button>
+        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+    </button>
+</form>
+{% endif %}
+
+<hr>
+
+{% for post in posts %}
+    <img src="{{ post.media_url }}" width="300">
+{% endfor %}
+
+</body>
+</html>
