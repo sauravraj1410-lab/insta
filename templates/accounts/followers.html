@@ -1,20 +1,174 @@
 <!DOCTYPE html>
 <html>
-<body style="font-family:Arial;background:#fafafa;">
+<head>
+    <title>{{ user_profile.username }} • Followers</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<h3>{{ user_profile.username }} • Followers</h3>
-<a href="/accounts/profile/">⬅ Back</a>
-<hr>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(to bottom, #fdfbfb, #ebedee);
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back {
+            text-decoration: none;
+            color: black;
+            font-size: 14px;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* SEARCH BAR */
+        .search-box {
+            margin-top: 12px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #0095f6;
+            box-shadow: 0 0 0 2px rgba(0,149,246,0.2);
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* FOLLOWER CARD */
+        .follower {
+            background: white;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s ease;
+        }
+
+        .follower:hover {
+            transform: translateY(-3px);
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .username {
+            text-decoration: none;
+            color: black;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .empty {
+            text-align: center;
+            margin-top: 40px;
+            color: gray;
+        }
+
+        @media (max-width: 480px) {
+            .follower {
+                padding: 12px;
+            }
+            .username {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="top-row">
+        <a href="/accounts/profile/" class="back">⬅ Back</a>
+        <h3>{{ user_profile.username }} • Followers</h3>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <div class="search-box">
+        <input type="text" id="searchInput"
+               placeholder="Search followers..."
+               onkeyup="filterFollowers()">
+    </div>
+</div>
+
+<div class="container">
 
 {% for f in followers %}
-    <div style="padding:10px;border-bottom:1px solid #ddd;">
-        <a href="/accounts/user/{{ f.follower.id }}/">
+    <div class="follower follower-card">
+        <div class="avatar">
+            {{ f.follower.username|first|upper }}
+        </div>
+
+        <a href="/accounts/user/{{ f.follower.id }}/"
+           class="username username-text">
             {{ f.follower.username }}
         </a>
     </div>
 {% empty %}
-    <p>No followers yet</p>
+    <p class="empty">No followers yet</p>
 {% endfor %}
+
+</div>
+
+<script>
+function filterFollowers() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const cards = document.querySelectorAll(".follower-card");
+
+    cards.forEach(card => {
+        const username = card.querySelector(".username-text").innerText.toLowerCase();
+        if (username.includes(input)) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+</script>
 
 </body>
 </html>
