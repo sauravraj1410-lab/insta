@@ -1,38 +1,232 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Discover People</title>
+    <title>Discover People • IS21</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
-        body { font-family: Arial; background:#fafafa; }
-        .user {
-            background:white;
-            padding:10px;
-            margin:10px;
-            border:1px solid #ddd;
-            display:flex;
-            justify-content:space-between;
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(to bottom, #fdfbfb, #ebedee);
         }
-        a { text-decoration:none; }
+
+        .header {
+            background: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back {
+            text-decoration: none;
+            color: black;
+            font-size: 14px;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        /* SEARCH BAR */
+        .search-box {
+            margin-top: 10px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            border-color: #0095f6;
+            box-shadow: 0 0 0 2px rgba(0,149,246,0.2);
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 15px 0 10px;
+            color: #555;
+        }
+
+        .user {
+            background: white;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.2s ease;
+        }
+
+        .user:hover {
+            transform: translateY(-3px);
+        }
+
+        .user-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .follow-btn {
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .follow {
+            background: linear-gradient(45deg,#0095f6,#0066ff);
+            color: white;
+        }
+
+        .follow:hover {
+            transform: scale(1.05);
+        }
+
+        .unfollow {
+            background: #eee;
+            color: #333;
+        }
+
+        .empty {
+            text-align: center;
+            margin-top: 30px;
+            color: gray;
+        }
+
+        @media (max-width: 480px) {
+            .user { padding: 12px; }
+        }
     </style>
 </head>
 <body>
 
-<h3>Discover People</h3>
-<a href="/">⬅ Back</a>
+<div class="header">
+    <div class="top-row">
+        <a href="/" class="back">⬅ Back</a>
+        <h3>Discover People</h3>
+    </div>
 
-{% for user in users %}
-<div class="user">
-    <strong>{{ user.username }}</strong>
-
-    {% if user.id in following_ids %}
-        <a href="/accounts/follow/{{ user.id }}/">Unfollow</a>
-    {% else %}
-        <a href="/accounts/follow/{{ user.id }}/">Follow</a>
-    {% endif %}
+    <!-- SEARCH BAR -->
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search users..." onkeyup="filterUsers()">
+    </div>
 </div>
-{% empty %}
-<p>No users found</p>
-{% endfor %}
+
+<div class="container">
+
+    <!-- SUGGESTED USERS SECTION -->
+    <div class="section-title">Suggested for You</div>
+
+    {% for user in users|slice:":3" %}
+    <div class="user user-card">
+        <div class="user-left">
+            <div class="avatar">
+                {{ user.username|first|upper }}
+            </div>
+            <div class="username">{{ user.username }}</div>
+        </div>
+
+        {% if user.id in following_ids %}
+            <a href="/accounts/follow/{{ user.id }}/" class="follow-btn unfollow">
+                Unfollow
+            </a>
+        {% else %}
+            <a href="/accounts/follow/{{ user.id }}/" class="follow-btn follow">
+                Follow
+            </a>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <!-- ALL USERS SECTION -->
+    <div class="section-title">All Users</div>
+
+    {% for user in users %}
+    <div class="user user-card">
+        <div class="user-left">
+            <div class="avatar">
+                {{ user.username|first|upper }}
+            </div>
+            <div class="username username-text">{{ user.username }}</div>
+        </div>
+
+        {% if user.id in following_ids %}
+            <a href="/accounts/follow/{{ user.id }}/" class="follow-btn unfollow">
+                Unfollow
+            </a>
+        {% else %}
+            <a href="/accounts/follow/{{ user.id }}/" class="follow-btn follow">
+                Follow
+            </a>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p class="empty">No users found</p>
+    {% endfor %}
+
+</div>
+
+<script>
+function filterUsers() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const cards = document.querySelectorAll(".user-card");
+
+    cards.forEach(card => {
+        const username = card.querySelector(".username").innerText.toLowerCase();
+        if (username.includes(input)) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+</script>
 
 </body>
 </html>
