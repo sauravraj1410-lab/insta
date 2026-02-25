@@ -1,20 +1,133 @@
 <!DOCTYPE html>
 <html>
-<body style="font-family:Arial;background:#fafafa;">
+<head>
+    <title>{{ user_profile.username }} • Following</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<h3>{{ user_profile.username }} • Following</h3>
-<a href="/accounts/profile/">⬅ Back</a>
-<hr>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(to bottom, #fdfbfb, #ebedee);
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back {
+            text-decoration: none;
+            color: black;
+            font-size: 14px;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* FOLLOWING CARD */
+        .following-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s ease;
+        }
+
+        .following-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .username {
+            text-decoration: none;
+            color: black;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .empty {
+            text-align: center;
+            margin-top: 40px;
+            color: gray;
+        }
+
+        @media (max-width: 480px) {
+            .following-card {
+                padding: 12px;
+            }
+            .username {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="top-row">
+        <a href="/accounts/profile/" class="back">⬅ Back</a>
+        <h3>{{ user_profile.username }} • Following</h3>
+    </div>
+</div>
+
+<div class="container">
 
 {% for f in following %}
-    <div style="padding:10px;border-bottom:1px solid #ddd;">
-        <a href="/accounts/user/{{ f.following.id }}/">
+    <div class="following-card">
+        <div class="avatar">
+            {{ f.following.username|first|upper }}
+        </div>
+
+        <a href="/accounts/user/{{ f.following.id }}/"
+           class="username">
             {{ f.following.username }}
         </a>
     </div>
 {% empty %}
-    <p>Not following anyone</p>
+    <p class="empty">Not following anyone</p>
 {% endfor %}
+
+</div>
 
 </body>
 </html>
