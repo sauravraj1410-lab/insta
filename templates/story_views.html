@@ -1,31 +1,138 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Story</title>
+    <title>Story • IS21 Instagram</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            background:black;
-            color:white;
-            text-align:center;
+            margin: 0;
+            background: linear-gradient(to top, #000000, #1c1c1c);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
+
+        /* TOP BAR */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            background: rgba(255,255,255,0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .username {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* STORY CONTAINER */
+        .story-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
         img, video {
-            max-width:100%;
-            max-height:90vh;
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
         }
-        button {
-            background:red;
-            color:white;
-            padding:10px;
-            border:none;
-            margin-top:10px;
+
+        /* LIKE SECTION */
+        .like-section {
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
         }
+
+        .like-btn {
+            background: linear-gradient(45deg,#ff004c,#ff3366);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255,0,80,0.4);
+            transition: 0.2s;
+        }
+
+        .like-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .like-btn.clicked {
+            animation: pop 0.4s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+
+        /* FLOAT HEART */
+        .heart {
+            position: absolute;
+            font-size: 80px;
+            animation: floatUp 1s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-20px) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(1.5);
+            }
+        }
+
     </style>
 </head>
 <body>
 
-<a href="/" style="color:white;">⬅ Back</a>
+<div class="top-bar">
+    <a href="/" class="back-btn">⬅ Back</a>
+    <div class="username">{{ story.user.username }}</div>
+    <div></div>
+</div>
 
-<h3>{{ story.user.username }}</h3>
+<div class="story-container">
 
 {% if ".mp4" in story.media_url %}
     <video src="{{ story.media_url }}" controls autoplay></video>
@@ -33,12 +140,39 @@
     <img src="{{ story.media_url }}">
 {% endif %}
 
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit">
-        ❤️ Like ({{ story.likes.count }})
-    </button>
-</form>
+</div>
+
+<div class="like-section">
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="like-btn">
+            ❤️ Like ({{ story.likes.count }})
+        </button>
+    </form>
+</div>
+
+<script>
+document.querySelector(".like-btn").addEventListener("click", function() {
+
+    this.classList.add("clicked");
+
+    let heart = document.createElement("div");
+    heart.innerHTML = "❤️";
+    heart.classList.add("heart");
+
+    heart.style.left = "50%";
+    heart.style.top = "60%";
+    heart.style.position = "absolute";
+
+    document.body.appendChild(heart);
+
+    setTimeout(() => {
+        heart.remove();
+        this.classList.remove("clicked");
+    }, 1000);
+
+});
+</script>
 
 </body>
 </html>
