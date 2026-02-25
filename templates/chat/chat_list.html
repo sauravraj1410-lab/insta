@@ -1,20 +1,159 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <title>Your Chats • IS21</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(to bottom, #fdfbfb, #ebedee);
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back {
+            text-decoration: none;
+            font-size: 14px;
+            color: black;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* CHAT CARD */
+        .chat-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: black;
+            transition: 0.2s ease;
+        }
+
+        .chat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .avatar-wrapper {
+            position: relative;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* ONLINE DOT */
+        .status-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .online {
+            background: #00c853;
+        }
+
+        .offline {
+            background: #bbb;
+        }
+
+        .username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .empty {
+            text-align: center;
+            color: gray;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 480px) {
+            .chat-card {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
 <body>
 
-<h3>Your Chats</h3>
-<a href="/">⬅ Back</a>
-<hr>
+<div class="header">
+    <div class="top-row">
+        <a href="/" class="back">⬅ Back</a>
+        <h3>Your Chats</h3>
+    </div>
+</div>
+
+<div class="container">
 
 {% for user in users %}
-    <p>
-        <a href="/chat/{{ user.id }}/">
+    <a href="/chat/{{ user.id }}/" class="chat-card">
+
+        <div class="avatar-wrapper">
+            <div class="avatar">
+                {{ user.username|first|upper }}
+            </div>
+
+            <!-- Online Indicator -->
+            <div class="status-dot {% if user.is_online %}online{% else %}offline{% endif %}"></div>
+        </div>
+
+        <div class="username">
             {{ user.username }}
-        </a>
-    </p>
+        </div>
+
+    </a>
 {% empty %}
-    <p>No mutual followers yet</p>
+    <p class="empty">No mutual followers yet</p>
 {% endfor %}
+
+</div>
 
 </body>
 </html>
