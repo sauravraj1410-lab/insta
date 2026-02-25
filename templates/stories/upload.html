@@ -2,73 +2,165 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Upload Story</title>
+    <title>Upload Story • IS21</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+        * { box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #fafafa;
             margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(135deg, #000000, #1c1c1c);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 420px;
         }
 
         .box {
-            max-width: 400px;
-            margin: 60px auto;
-            background: white;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(15px);
+            padding: 30px;
+            border-radius: 20px;
             text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
         }
 
         h3 {
-            margin-bottom: 15px;
+            margin-top: 0;
+            font-size: 22px;
+            background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .file-input {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 15px;
+            cursor: pointer;
         }
 
         input[type="file"] {
-            margin-bottom: 15px;
+            display: none;
+        }
+
+        .preview img,
+        .preview video {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
         }
 
         button {
             width: 100%;
-            padding: 10px;
-            background: black;
-            color: white;
+            padding: 14px;
+            margin-top: 20px;
             border: none;
+            border-radius: 30px;
             font-size: 15px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(45deg,#ff004c,#ff3366);
             cursor: pointer;
         }
 
-        #status {
-            margin-top: 15px;
-            font-size: 14px;
-            color: green;
+        /* PROGRESS BAR */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
         }
 
-        a {
-            display: block;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #555;
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(45deg,#ff004c,#ff3366);
+            transition: width 0.2s ease;
+        }
+
+        .percent-text {
+            margin-top: 8px;
+            font-size: 13px;
+            display: none;
+        }
+
+        #status {
+            margin-top: 10px;
             font-size: 14px;
+        }
+
+        .success { color: #00e676; }
+        .error { color: #ff5252; }
+
+        .back {
+            display: block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #ccc;
         }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h3>📸 Upload Story</h3>
+<div class="container">
+    <div class="box">
 
-    <input type="file" id="file" accept="image/*,video/*">
+        <h3>📸 Upload Story</h3>
 
-    <button onclick="uploadStory()">Upload</button>
+        <label class="file-input">
+            Tap to select photo or video
+            <input type="file" id="file" accept="image/*,video/*" onchange="previewStory()">
+        </label>
 
-    <div id="status"></div>
+        <div class="preview" id="preview"></div>
 
-    <a href="/">⬅ Back to Home</a>
+        <button onclick="uploadStory()">Upload Story</button>
+
+        <!-- Progress -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="percent-text" id="percentText">0%</div>
+
+        <div id="status"></div>
+
+        <a href="/" class="back">⬅ Back to Home</a>
+
+    </div>
 </div>
 
 <script>
+function previewStory() {
+    const file = document.getElementById("file").files[0];
+    const preview = document.getElementById("preview");
+    preview.innerHTML = "";
+
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        if (file.type.startsWith("video")) {
+            preview.innerHTML = `<video src="${e.target.result}" controls></video>`;
+        } else {
+            preview.innerHTML = `<img src="${e.target.result}">`;
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -84,54 +176,68 @@ function getCookie(name) {
     return cookieValue;
 }
 
-async function uploadStory() {
+function uploadStory() {
     const fileInput = document.getElementById("file");
     const status = document.getElementById("status");
 
     if (!fileInput.files.length) {
-        alert("Please select a photo or video");
+        alert("Please select a file");
         return;
     }
 
     const file = fileInput.files[0];
-    status.innerText = "Uploading story...";
+
+    const progressContainer = document.getElementById("progressContainer");
+    const progressBar = document.getElementById("progressBar");
+    const percentText = document.getElementById("percentText");
+
+    progressContainer.style.display = "block";
+    percentText.style.display = "block";
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "mini_insta_upload");
 
-    // 👉 Upload to Cloudinary
-    const cloudRes = await fetch(
-        "https://api.cloudinary.com/v1_1/dlxwcejgs/auto/upload",
-        {
-            method: "POST",
-            body: formData
-        }
-    );
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://api.cloudinary.com/v1_1/dlxwcejgs/auto/upload");
 
-    const cloudData = await cloudRes.json();
-
-    if (!cloudData.secure_url) {
-        status.innerText = "❌ Upload failed";
-        return;
-    }
-
-    // 👉 Save story in Django
-    const djangoData = new FormData();
-    djangoData.append("media_url", cloudData.secure_url);
-
-    await fetch("/stories/upload/", {
-        method: "POST",
-        body: djangoData,
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
+    xhr.upload.addEventListener("progress", function(e) {
+        if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percent + "%";
+            percentText.innerText = percent + "%";
         }
     });
 
-    status.innerText = "✅ Story uploaded successfully!";
-    setTimeout(() => {
-        window.location.href = "/";
-    }, 1500);
+    xhr.onload = async function() {
+        const response = JSON.parse(xhr.responseText);
+
+        if (!response.secure_url) {
+            status.className = "error";
+            status.innerText = "❌ Upload failed";
+            return;
+        }
+
+        const djangoData = new FormData();
+        djangoData.append("media_url", response.secure_url);
+
+        await fetch("/stories/upload/", {
+            method: "POST",
+            body: djangoData,
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            }
+        });
+
+        status.className = "success";
+        status.innerText = "✅ Story uploaded successfully!";
+
+        setTimeout(() => {
+            window.location.href = "/";
+        }, 1500);
+    };
+
+    xhr.send(formData);
 }
 </script>
 
