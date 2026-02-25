@@ -1,30 +1,133 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sign Up</title>
+    <title>Sign Up • IS21</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            width: 95%;
+            max-width: 400px;
+            background: white;
+            padding: 35px 25px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            text-align: center;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h3 {
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 24px;
+            background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .error {
+            background: #ffe5e5;
+            color: #d60000;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #0095f6;
+            box-shadow: 0 0 0 2px rgba(0,149,246,0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(45deg,#0095f6,#0066ff);
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,149,246,0.3);
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .login-text {
+            margin-top: 18px;
+            font-size: 13px;
+        }
+
+        .login-text a {
+            text-decoration: none;
+            font-weight: 600;
+            color: #0095f6;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 25px 20px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<h3>Create Account</h3>
+<div class="card">
+    <h3>Create Account</h3>
 
-{% if error %}
-<p style="color:red;">{{ error }}</p>
-{% endif %}
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
 
-<form method="POST">
-    {% csrf_token %}
+    <form method="POST">
+        {% csrf_token %}
 
-    <input type="text" name="username" placeholder="Username" required><br><br>
+        <input type="text" name="username" placeholder="Username" required>
 
-    <input type="email" name="email" placeholder="Email address" required><br><br>
+        <input type="email" name="email" placeholder="Email address" required>
 
-    <input type="password" name="password" placeholder="Password" required><br><br>
+        <input type="password" name="password" placeholder="Password" required>
 
-    <button type="submit">Sign Up</button>
-</form>
+        <button type="submit">Sign Up</button>
+    </form>
 
-<p>Already have an account?
-<a href="/accounts/login/">Login</a></p>
+    <div class="login-text">
+        Already have an account?
+        <a href="/accounts/login/">Login</a>
+    </div>
+</div>
 
 </body>
 </html>
