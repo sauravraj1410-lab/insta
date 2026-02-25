@@ -2,63 +2,179 @@
 <html>
 <head>
     <title>{{ user_profile.username }} • Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
+        * { box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #fafafa;
             margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(to bottom, #fdfbfb, #ebedee);
         }
+
+        /* HEADER */
         .header {
             background: white;
-            padding: 12px;
+            padding: 15px;
             border-bottom: 1px solid #ddd;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
+
+        .header a {
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .logout {
+            color: red;
+        }
+
+        /* CONTAINER */
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: auto;
-            padding: 15px;
+            padding: 20px 15px;
         }
+
+        /* PROFILE TOP */
         .profile-top {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
+            flex-wrap: wrap;
         }
+
         .avatar {
-            width: 90px;
-            height: 90px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             object-fit: cover;
-            border: 1px solid #ccc;
+            border: 3px solid #eee;
         }
+
+        .profile-info strong {
+            font-size: 18px;
+        }
+
+        .bio {
+            margin-top: 6px;
+            font-size: 14px;
+            color: #444;
+        }
+
+        /* STATS */
         .stats {
             display: flex;
             justify-content: space-around;
-            margin: 15px 0;
+            margin: 20px 0;
             text-align: center;
         }
+
         .stats div {
             font-size: 14px;
         }
+
+        .stats a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .stats strong {
+            font-size: 16px;
+        }
+
+        /* AVATAR UPLOAD */
         .upload-box {
-            margin-top: 10px;
             text-align: center;
+            margin-bottom: 25px;
         }
+
         .upload-box input {
-            margin-top: 6px;
+            margin-top: 8px;
         }
+
+        .upload-box button {
+            margin-top: 10px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(45deg,#0095f6,#0066ff);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .upload-box button:hover {
+            transform: scale(1.05);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+
+        /* POSTS GRID */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
         .post {
             background: white;
-            border: 1px solid #ddd;
-            margin-bottom: 15px;
-            padding: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        img.post-img, video {
+
+        .post img,
+        .post video {
             width: 100%;
-            border-radius: 4px;
+            display: block;
         }
+
+        .post-caption {
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        .empty {
+            text-align: center;
+            color: gray;
+            margin-top: 20px;
+        }
+
+        /* MOBILE */
+        @media (max-width: 600px) {
+            .profile-top {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .stats {
+                flex-direction: row;
+            }
+
+            .posts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
     </style>
 </head>
 
@@ -67,7 +183,7 @@
 <div class="header">
     <a href="/">⬅ Home</a>
     <strong>{{ user_profile.username }}</strong>
-    <a href="/accounts/logout/" style="color:red;">Logout</a>
+    <a href="/accounts/logout/" class="logout">Logout</a>
 </div>
 
 <div class="container">
@@ -75,36 +191,37 @@
     <!-- PROFILE HEADER -->
     <div class="profile-top">
         <img id="avatarPreview"
-             src="{{ profile.avatar|default:'https://via.placeholder.com/90' }}"
+             src="{{ profile.avatar|default:'https://via.placeholder.com/100' }}"
              class="avatar">
 
-        <div>
+        <div class="profile-info">
             <strong>{{ user_profile.username }}</strong>
-            <p style="margin:4px 0;">{{ profile.bio|default:"just enjoying my life" }}</p>
+            <div class="bio">
+                {{ profile.bio|default:"just enjoying my life" }}
+            </div>
         </div>
     </div>
 
     <!-- STATS -->
-<div class="stats">
-    <div>
-        <strong>{{ post_count }}</strong><br>Posts
+    <div class="stats">
+        <div>
+            <strong>{{ post_count }}</strong><br>Posts
+        </div>
+
+        <div>
+            <a href="/accounts/followers/{{ user_profile.id }}/">
+                <strong>{{ followers_count }}</strong><br>Followers
+            </a>
+        </div>
+
+        <div>
+            <a href="/accounts/following/{{ user_profile.id }}/">
+                <strong>{{ following_count }}</strong><br>Following
+            </a>
+        </div>
     </div>
 
-    <div>
-        <a href="/accounts/followers/{{ user_profile.id }}/">
-            <strong>{{ followers_count }}</strong><br>Followers
-        </a>
-    </div>
-
-    <div>
-        <a href="/accounts/following/{{ user_profile.id }}/">
-            <strong>{{ following_count }}</strong><br>Following
-        </a>
-    </div>
-</div>
-
-
-    <!-- PROFILE PHOTO UPLOAD (PHOTO ONLY) -->
+    <!-- PROFILE PHOTO UPLOAD -->
     <div class="upload-box">
         <input type="file" id="avatarFile" accept="image/*">
         <br>
@@ -114,18 +231,20 @@
     <hr>
 
     <!-- POSTS -->
+    <div class="posts-grid">
     {% for post in posts %}
         <div class="post">
             {% if ".mp4" in post.media_url %}
                 <video src="{{ post.media_url }}" controls></video>
             {% else %}
-                <img src="{{ post.media_url }}" class="post-img">
+                <img src="{{ post.media_url }}">
             {% endif %}
-            <p>{{ post.caption }}</p>
+            <div class="post-caption">{{ post.caption }}</div>
         </div>
     {% empty %}
-        <p>No posts yet.</p>
+        <p class="empty">No posts yet.</p>
     {% endfor %}
+    </div>
 
 </div>
 
@@ -138,7 +257,6 @@ async function uploadAvatar() {
         return;
     }
 
-    // ❌ Block video upload explicitly
     if (!file.type.startsWith("image/")) {
         alert("Only photos are allowed ❌");
         return;
@@ -148,7 +266,6 @@ async function uploadAvatar() {
     formData.append("file", file);
     formData.append("upload_preset", "mini_insta_upload");
 
-    // Upload to Cloudinary
     const cloudRes = await fetch(
         "https://api.cloudinary.com/v1_1/dlxwcejgs/image/upload",
         { method: "POST", body: formData }
@@ -161,7 +278,6 @@ async function uploadAvatar() {
         return;
     }
 
-    // Send URL to Django
     const djangoData = new FormData();
     djangoData.append("avatar", cloudData.secure_url);
 
@@ -173,7 +289,6 @@ async function uploadAvatar() {
         }
     });
 
-    // Update preview instantly
     document.getElementById("avatarPreview").src = cloudData.secure_url;
 }
 </script>
