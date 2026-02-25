@@ -1,39 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Story</title>
+    <title>Story • IS21</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
             background: black;
             color: white;
-            font-family: Arial;
-            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            overflow: hidden;
+        }
+
+        .story-container {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         img, video {
             max-width: 100%;
-            max-height: 85vh;
-            margin-top: 20px;
+            max-height: 100%;
+            object-fit: contain;
         }
 
+        /* TOP PROGRESS */
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg,#f58529,#dd2a7b,#8134af);
+            animation: storyProgress 5s linear forwards;
+        }
+
+        @keyframes storyProgress {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        /* DOUBLE TAP HEART */
+        .big-heart {
+            position: absolute;
+            font-size: 100px;
+            color: rgba(255,0,80,0.9);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        .big-heart.show {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        /* TAP ZONES */
+        .tap-zone {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 50%;
+        }
+
+        .left-zone { left: 0; }
+        .right-zone { right: 0; }
+
+        /* BOTTOM BAR */
         .bottom-bar {
-            position: fixed;
+            position: absolute;
             bottom: 0;
             width: 100%;
-            padding: 12px;
+            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(transparent, rgba(0,0,0,0.7));
-        }
-
-        .left, .right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
         }
 
         button {
@@ -44,40 +98,121 @@
             cursor: pointer;
         }
 
-        a {
+        .emoji-bar {
+            display: flex;
+            gap: 10px;
+            font-size: 22px;
+        }
+
+        .emoji {
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .emoji:hover {
+            transform: scale(1.3);
+        }
+
+        .back {
+            position: absolute;
+            top: 10px;
+            right: 15px;
             color: white;
             text-decoration: none;
-            font-size: 16px;
         }
     </style>
 </head>
 
 <body>
 
-{% if ".mp4" in story.media_url %}
-    <video src="{{ story.media_url }}" autoplay controls></video>
-{% else %}
-    <img src="{{ story.media_url }}">
-{% endif %}
+<div class="story-container" id="storyContainer">
 
-<div class="bottom-bar">
-    <div class="left">
-        <!-- LIKE -->
+    <!-- Progress -->
+    <div class="progress-bar">
+        <div class="progress" id="progressBar"></div>
+    </div>
+
+    <a href="/" class="back">✕</a>
+
+    <!-- Story Media -->
+    {% if ".mp4" in story.media_url %}
+        <video id="storyMedia" src="{{ story.media_url }}" autoplay playsinline></video>
+    {% else %}
+        <img id="storyMedia" src="{{ story.media_url }}">
+    {% endif %}
+
+    <!-- Double Tap Heart -->
+    <div class="big-heart" id="bigHeart">❤️</div>
+
+    <!-- Tap Zones -->
+    <div class="tap-zone left-zone" onclick="goPrevious()"></div>
+    <div class="tap-zone right-zone" onclick="goNext()"></div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-bar">
+
+        <!-- LIKE (UNCHANGED LOGIC) -->
         <form method="POST" action="/stories/like/{{ story.id }}/">
             {% csrf_token %}
             <button>❤️ {{ story.total_likes }}</button>
         </form>
-    </div>
 
-    <div class="right">
-        <!-- VIEWERS (ONLY OWNER SEES THIS) -->
+        <!-- EMOJI REACTIONS -->
+        <div class="emoji-bar">
+            <span class="emoji" onclick="react('😍')">😍</span>
+            <span class="emoji" onclick="react('🔥')">🔥</span>
+            <span class="emoji" onclick="react('😂')">😂</span>
+            <span class="emoji" onclick="react('👏')">👏</span>
+        </div>
+
         {% if request.user == story.user %}
             <a href="/stories/analytics/{{ story.id }}/">
                 👁 {{ story.total_views }}
             </a>
         {% endif %}
     </div>
+
 </div>
+
+<script>
+const storyContainer = document.getElementById("storyContainer");
+const bigHeart = document.getElementById("bigHeart");
+const progressBar = document.getElementById("progressBar");
+
+let lastTap = 0;
+
+/* DOUBLE TAP LIKE */
+storyContainer.addEventListener("click", function(e) {
+    const now = new Date().getTime();
+    if (now - lastTap < 300) {
+        bigHeart.classList.add("show");
+        setTimeout(() => {
+            bigHeart.classList.remove("show");
+        }, 600);
+    }
+    lastTap = now;
+});
+
+/* NEXT STORY (Replace with your real logic) */
+function goNext() {
+    window.location.href = "/"; // change to next story URL
+}
+
+function goPrevious() {
+    window.history.back();
+}
+
+/* AUTO NEXT AFTER PROGRESS */
+setTimeout(() => {
+    goNext();
+}, 5000);
+
+/* EMOJI REACTION */
+function react(emoji) {
+    alert("You reacted with " + emoji);
+    // You can connect this to backend later
+}
+</script>
 
 </body>
 </html>
