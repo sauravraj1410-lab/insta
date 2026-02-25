@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Story Views</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #fafafa;
+            margin: 0;
+        }
+        .box {
+            max-width: 400px;
+            margin: 30px auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h3 {
+            margin-top: 0;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        a {
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: #0095f6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h3>👁 {{ story.total_views }} Views</h3>
+
+    {% if viewers %}
+        <ul>
+            {% for user in viewers %}
+                <li>{{ user.username }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No one has viewed this story yet.</p>
+    {% endif %}
+
+    <a href="/">⬅ Back</a>
+</div>
+
+</body>
+</html>

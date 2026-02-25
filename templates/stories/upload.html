@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Story</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fafafa;
+            margin: 0;
+        }
+
+        .box {
+            max-width: 400px;
+            margin: 60px auto;
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        h3 {
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: black;
+            color: white;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: green;
+        }
+
+        a {
+            display: block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #555;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h3>📸 Upload Story</h3>
+
+    <input type="file" id="file" accept="image/*,video/*">
+
+    <button onclick="uploadStory()">Upload</button>
+
+    <div id="status"></div>
+
+    <a href="/">⬅ Back to Home</a>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+async function uploadStory() {
+    const fileInput = document.getElementById("file");
+    const status = document.getElementById("status");
+
+    if (!fileInput.files.length) {
+        alert("Please select a photo or video");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    status.innerText = "Uploading story...";
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "mini_insta_upload");
+
+    // 👉 Upload to Cloudinary
+    const cloudRes = await fetch(
+        "https://api.cloudinary.com/v1_1/dlxwcejgs/auto/upload",
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+
+    const cloudData = await cloudRes.json();
+
+    if (!cloudData.secure_url) {
+        status.innerText = "❌ Upload failed";
+        return;
+    }
+
+    // 👉 Save story in Django
+    const djangoData = new FormData();
+    djangoData.append("media_url", cloudData.secure_url);
+
+    await fetch("/stories/upload/", {
+        method: "POST",
+        body: djangoData,
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+        }
+    });
+
+    status.innerText = "✅ Story uploaded successfully!";
+    setTimeout(() => {
+        window.location.href = "/";
+    }, 1500);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Post</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fafafa;
+        }
+        .box {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: black;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h3>Upload Post</h3>
+
+    <input type="file" id="file"><br><br>
+    <input type="text" id="caption" placeholder="Caption"><br><br>
+
+    <button onclick="upload()">Upload</button>
+</div>
+
+<script>
+async function upload() {
+    const file = document.getElementById("file").files[0];
+    const caption = document.getElementById("caption").value;
+
+    if (!file) {
+        alert("Select a file");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "mini_insta_upload");
+
+    const cloudRes = await fetch(
+        "https://api.cloudinary.com/v1_1/dlxwcejgs/auto/upload",
+        { method: "POST", body: formData }
+    );
+
+    const cloudData = await cloudRes.json();
+
+    const djangoData = new FormData();
+    djangoData.append("media_url", cloudData.secure_url);
+    djangoData.append("caption", caption);
+
+    await fetch("/posts/upload/", {
+        method: "POST",
+        body: djangoData
+    });
+
+    window.location.href = "/";
+}
+</script>
+
+</body>
+</html>

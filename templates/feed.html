@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IS21 Instagram</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: #fafafa;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: #fff;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .nav-icons a {
+            margin-left: 14px;
+            text-decoration: none;
+            font-size: 20px;
+        }
+
+        /* ===== STORIES ===== */
+        .stories {
+            display: flex;
+            gap: 14px;
+            padding: 12px;
+            background: #fff;
+            border-bottom: 1px solid #dbdbdb;
+            overflow-x: auto;
+        }
+
+        .story {
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .story img {
+            width: 66px;
+            height: 66px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af);
+            object-fit: cover;
+        }
+
+        .story span {
+            display: block;
+            margin-top: 4px;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ===== FEED ===== */
+        .container {
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .post {
+            background: #fff;
+            border: 1px solid #dbdbdb;
+            margin-bottom: 20px;
+        }
+
+        .post-header {
+            padding: 10px;
+            font-weight: 600;
+        }
+
+        .post-media img,
+        .post-media video {
+            width: 100%;
+            display: block;
+        }
+
+        .post-actions {
+            padding: 8px 10px;
+            display: flex;
+            gap: 16px;
+            font-size: 22px;
+        }
+
+        .post-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 22px;
+        }
+
+        .post-details {
+            padding: 0 10px 10px;
+            font-size: 14px;
+        }
+
+        .likes {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .caption {
+            margin-bottom: 6px;
+        }
+
+        .time {
+            font-size: 12px;
+            color: gray;
+        }
+
+        .comment-box {
+            border-top: 1px solid #efefef;
+            padding: 8px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .comment-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .comment-box button {
+            border: none;
+            background: none;
+            color: #0095f6;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* ===== FLOATING UPLOAD BUTTON ===== */
+        .upload-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 54px;
+            height: 54px;
+            background: #0095f6;
+            color: white;
+            border-radius: 50%;
+            font-size: 30px;
+            text-align: center;
+            line-height: 54px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="logo"> 🧧 IS21 Instagram</div>
+    <div class="nav-icons">
+        <a href="/">🏠</a>
+        <a href="/chat/">💬</a>
+        <a href="/accounts/profile/">👤</a>
+        <a href="/accounts/logout/">🚪</a>
+    </div>
+</header>
+
+<!-- STORIES -->
+<div class="stories">
+    <div class="story">
+        <a href="/stories/upload/">
+            {% if profile.avatar %}
+                <img src="{{ profile.avatar }}" class="story-img">
+            {% else %}
+                <img src="https://via.placeholder.com/150" class="story-img">
+            {% endif %}
+        </a>
+        <span>Add story</span>
+    </div>
+
+    {% for story in stories %}
+    <div class="story">
+        <a href="/stories/{{ story.id }}/">
+            <img src="{{ story.media_url }}">
+        </a>
+        <span>{{ story.user.username }}</span>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- FEED -->
+<div class="container">
+{% for post in posts %}
+    <div class="post">
+
+        <div class="post-header">
+            {{ post.user.username }}
+        </div>
+
+        <div class="post-media">
+            {% if ".mp4" in post.media_url %}
+                <video src="{{ post.media_url }}" controls></video>
+            {% else %}
+                <img src="{{ post.media_url }}">
+            {% endif %}
+        </div>
+
+        <div class="post-actions">
+            <form method="POST" action="/posts/like/{{ post.id }}/">
+                {% csrf_token %}
+                <button type="submit">❤️</button>
+            </form>
+            <span></span>
+        </div>
+
+        <div class="post-details">
+            <div class="likes">{{ post.total_likes }} likes</div>
+            <div class="caption">
+                <strong>{{ post.user.username }}</strong> {{ post.caption }}
+            </div>
+
+            {% for comment in post.comments.all %}
+                <div>
+                    <strong>{{ comment.user.username }}</strong> {{ comment.text }}
+                </div>
+            {% endfor %}
+
+            <div class="time">{{ post.created_at }}</div>
+        </div>
+
+        <form method="POST" action="/posts/comment/{{ post.id }}/" class="comment-box">
+            {% csrf_token %}
+            <input type="text" name="comment" placeholder="Add a comment…" required>
+            <button type="submit">Post</button>
+        </form>
+
+    </div>
+{% empty %}
+    <p style="text-align:center;">No posts yet</p>
+{% endfor %}
+</div>
+
+<!-- FLOATING UPLOAD -->
+<a href="/posts/upload/" class="upload-btn">＋</a>
+
+</body>
+</html>
+

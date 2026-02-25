@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Story</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fafafa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .box {
+            background: white;
+            padding: 20px;
+            width: 300px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: black;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h3>Upload Story</h3>
+
+    <input type="file" id="file" accept="image/*,video/*">
+    <button onclick="uploadStory()">Upload</button>
+</div>
+
+<script>
+async function uploadStory() {
+    const fileInput = document.getElementById("file");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please select an image or video");
+        return;
+    }
+
+    // Upload to Cloudinary
+    const cloudData = new FormData();
+    cloudData.append("file", file);
+    cloudData.append("upload_preset", "mini_insta_upload");
+
+    const cloudRes = await fetch(
+        "https://api.cloudinary.com/v1_1/dlxwcejgs/auto/upload",
+        {
+            method: "POST",
+            body: cloudData
+        }
+    );
+
+    const cloudJson = await cloudRes.json();
+
+    if (!cloudJson.secure_url) {
+        alert("Cloud upload failed");
+        return;
+    }
+
+    // Send URL to Django
+    const djangoData = new FormData();
+    djangoData.append("media_url", cloudJson.secure_url);
+
+    await fetch("/stories/upload/", {
+        method: "POST",
+        body: djangoData
+    });
+
+    window.location.href = "/";
+}
+</script>
+
+</body>
+</html>

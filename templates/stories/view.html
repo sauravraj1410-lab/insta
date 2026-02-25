@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Story</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            color: white;
+            font-family: Arial;
+            text-align: center;
+        }
+
+        img, video {
+            max-width: 100%;
+            max-height: 85vh;
+            margin-top: 20px;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+        }
+
+        .left, .right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+{% if ".mp4" in story.media_url %}
+    <video src="{{ story.media_url }}" autoplay controls></video>
+{% else %}
+    <img src="{{ story.media_url }}">
+{% endif %}
+
+<div class="bottom-bar">
+    <div class="left">
+        <!-- LIKE -->
+        <form method="POST" action="/stories/like/{{ story.id }}/">
+            {% csrf_token %}
+            <button>❤️ {{ story.total_likes }}</button>
+        </form>
+    </div>
+
+    <div class="right">
+        <!-- VIEWERS (ONLY OWNER SEES THIS) -->
+        {% if request.user == story.user %}
+            <a href="/stories/analytics/{{ story.id }}/">
+                👁 {{ story.total_views }}
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>
