@@ -2,89 +2,208 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Upload Story</title>
+    <title>Upload Story • IS21</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
+        * { box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #fafafa;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(135deg, #000000, #1c1c1c);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: white;
         }
+
         .box {
-            background: white;
-            padding: 20px;
-            width: 300px;
-            border: 1px solid #ddd;
+            width: 95%;
+            max-width: 380px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(15px);
+            padding: 30px;
+            border-radius: 20px;
             text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
         }
-        input {
-            width: 100%;
-            margin-bottom: 10px;
+
+        h3 {
+            margin-top: 0;
+            font-size: 22px;
+            background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+
+        .file-input {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .file-input:hover {
+            border-color: #ff3366;
+            background: rgba(255,255,255,0.05);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .preview {
+            margin-top: 15px;
+        }
+
+        .preview img,
+        .preview video {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
         button {
             width: 100%;
-            padding: 10px;
-            background: black;
-            color: white;
+            padding: 14px;
+            margin-top: 20px;
             border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(45deg,#ff004c,#ff3366);
             cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255,0,80,0.4);
+            transition: 0.2s;
         }
+
         button:hover {
-            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(45deg,#ff004c,#ff3366);
+            transition: width 0.2s ease;
+        }
+
+        .percent-text {
+            margin-top: 8px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 
+<a href="/" class="back-link">⬅ Back</a>
+
 <div class="box">
     <h3>Upload Story</h3>
 
-    <input type="file" id="file" accept="image/*,video/*">
-    <button onclick="uploadStory()">Upload</button>
+    <label class="file-input">
+        📸 Tap to select photo or video
+        <input type="file" id="file" accept="image/*,video/*" onchange="previewStory()">
+    </label>
+
+    <div class="preview" id="preview"></div>
+
+    <button onclick="uploadStory()">Upload Story</button>
+
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="percent-text" id="percentText">0%</div>
 </div>
 
 <script>
-async function uploadStory() {
-    const fileInput = document.getElementById("file");
-    const file = fileInput.files[0];
+function previewStory() {
+    const file = document.getElementById("file").files[0];
+    const preview = document.getElementById("preview");
+    preview.innerHTML = "";
 
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        if (file.type.startsWith("video")) {
+            preview.innerHTML = `<video src="${e.target.result}" controls></video>`;
+        } else {
+            preview.innerHTML = `<img src="${e.target.result}">`;
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function uploadStory() {
+    const file = document.getElementById("file").files[0];
     if (!file) {
-        alert("Please select an image or video");
+        alert("Please select a file");
         return;
     }
 
-    // Upload to Cloudinary
+    const progressContainer = document.getElementById("progressContainer");
+    const progressBar = document.getElementById("progressBar");
+    const percentText = document.getElementById("percentText");
+
+    progressContainer.style.display = "block";
+    percentText.style.display = "block";
+
     const cloudData = new FormData();
     cloudData.append("file", file);
     cloudData.append("upload_preset", "mini_insta_upload");
 
-    const cloudRes = await fetch(
-        "https://api.cloudinary.com/v1_1/dlxwcejgs/auto/upload",
-        {
-            method: "POST",
-            body: cloudData
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://api.cloudinary.com/v1_1/dlxwcejgs/auto/upload");
+
+    xhr.upload.addEventListener("progress", function(e) {
+        if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percent + "%";
+            percentText.innerText = percent + "%";
         }
-    );
-
-    const cloudJson = await cloudRes.json();
-
-    if (!cloudJson.secure_url) {
-        alert("Cloud upload failed");
-        return;
-    }
-
-    // Send URL to Django
-    const djangoData = new FormData();
-    djangoData.append("media_url", cloudJson.secure_url);
-
-    await fetch("/stories/upload/", {
-        method: "POST",
-        body: djangoData
     });
 
-    window.location.href = "/";
+    xhr.onload = async function() {
+        const response = JSON.parse(xhr.responseText);
+
+        const djangoData = new FormData();
+        djangoData.append("media_url", response.secure_url);
+
+        await fetch("/stories/upload/", {
+            method: "POST",
+            body: djangoData
+        });
+
+        window.location.href = "/";
+    };
+
+    xhr.send(cloudData);
 }
 </script>
 
