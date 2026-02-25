@@ -1,48 +1,177 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload Post</title>
+    <title>Upload Post • IS21</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #fafafa;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+            background: linear-gradient(to bottom, #fdfbfb, #ebedee);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
+
         .box {
-            max-width: 400px;
-            margin: 50px auto;
+            width: 95%;
+            max-width: 420px;
             background: white;
-            padding: 20px;
-            border: 1px solid #ddd;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            animation: fadeIn 0.5s ease;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h3 {
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 22px;
+            background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .file-input {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .file-input:hover {
+            border-color: #0095f6;
+            background: #f5faff;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .preview {
+            margin-top: 15px;
+        }
+
+        .preview img,
+        .preview video {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            outline: none;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        input[type="text"]:focus {
+            border-color: #0095f6;
+            box-shadow: 0 0 0 2px rgba(0,149,246,0.2);
+        }
+
         button {
             width: 100%;
-            padding: 10px;
-            background: black;
-            color: white;
+            padding: 14px;
+            margin-top: 20px;
             border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(45deg,#0095f6,#0066ff);
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,149,246,0.3);
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
 
+<a href="/" class="back-link">⬅ Back</a>
+
 <div class="box">
     <h3>Upload Post</h3>
 
-    <input type="file" id="file"><br><br>
-    <input type="text" id="caption" placeholder="Caption"><br><br>
+    <label class="file-input">
+        📸 Click to select photo or video
+        <input type="file" id="file" onchange="previewFile()">
+    </label>
 
-    <button onclick="upload()">Upload</button>
+    <div class="preview" id="preview"></div>
+
+    <input type="text" id="caption" placeholder="Write a caption...">
+
+    <button onclick="upload()" id="uploadBtn">Upload</button>
 </div>
 
 <script>
+function previewFile() {
+    const file = document.getElementById("file").files[0];
+    const preview = document.getElementById("preview");
+    preview.innerHTML = "";
+
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        if (file.type.startsWith("video")) {
+            preview.innerHTML = `<video src="${e.target.result}" controls></video>`;
+        } else {
+            preview.innerHTML = `<img src="${e.target.result}">`;
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
 async function upload() {
     const file = document.getElementById("file").files[0];
     const caption = document.getElementById("caption").value;
+    const btn = document.getElementById("uploadBtn");
 
     if (!file) {
         alert("Select a file");
         return;
     }
+
+    btn.innerText = "Uploading...";
+    btn.classList.add("loading");
 
     const formData = new FormData();
     formData.append("file", file);
